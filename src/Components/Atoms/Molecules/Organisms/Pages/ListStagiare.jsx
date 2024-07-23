@@ -3,32 +3,42 @@ import React, { useEffect, useState } from 'react';
 function ListStagiare() {
   const [data, setData] = useState([]);
 
-  useEffect(() => {
+
+
+useEffect(() => {
+  function getData() {
     fetch('https://localhost:7043/api/Trainee/GetListNonValid')
       .then((r) => r.json())
       .then((val) => setData(val))
       .catch((err) => console.error(err));
-  }, []);
+  }
+  getData()
+}, [])
+
 
   const handleDelete = (id) => {
     fetch(`https://localhost:7043/api/Trainee/DeleteTrainee/${id}`, {
       method: 'DELETE',
     })
-      .then(() => setData(data.filter(e => e.id !== id)))
+      .then(() => {
+        setData(data.filter(e => e.id !== id))
+        getData();
+      })
       .catch((err) => console.error(err));
 
   };
 
-  const handleValidate = (id, status) => {
+  const handleValidate = (id) => {
     fetch(`https://localhost:7043/api/Trainee/ValidateTrainee`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id, status }),
+      body: JSON.stringify({ "idTrainee": id }),
     })
       .then(() => {
         setData(data.map(e => e.id === id ? { ...e, RegistrationStatus: status } : e));
+        getData();
       })
       .catch((err) => console.error(err));
   };
@@ -96,13 +106,13 @@ function ListStagiare() {
                 <>
                   <button 
                     className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                    onClick={() => handleValidate(e.id, 'ACCEPTED')}
+                    onClick={() => handleValidate(e.id)}
                   >
                     Accepted
                   </button>
                   <button 
                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                    onClick={() => handleValidate(e.id, 'REFUSED')}
+                    onClick={() => handleDelete(e.id)}
                   >
                     Refused
                   </button>
